@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainSpark | Light It Up</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+
+        :root {
+            --cream: #FFF9F0;
+            --beige: #F5E6D8;
+            --light-brown: #E8D5C0;
+            --gold: #D4AF37;
+            --coffee: #A68A64;
+            --text: #3A3226;
+            --shadow: rgba(58, 50, 38, 0.1);
+            --card-bg: rgba(255, 249, 240, 0.85);
+            --light-off: #D8C9B4;
+            --light-on: #FFE082;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--cream);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Элегантный фон с пузырями */
+        .bubbles-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--beige), var(--cream));
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(212, 175, 55, 0.08);
+            backdrop-filter: blur(2px);
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-1000px) rotate(720deg); opacity: 0; }
+        }
+
+        /* Основные стили */
+        header {
+            padding: 2rem 1rem 1rem;
+            text-align: center;
+            background: linear-gradient(to bottom, var(--cream), transparent);
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--coffee);
+            margin-bottom: 0.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        .game-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            color: var(--coffee);
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .game-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .game-board {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 25px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .game-info {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .game-description {
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--coffee);
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat i {
+            color: var(--gold);
+        }
+
+        /* Стили для игры Light It Up */
+        .light-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+
+        .light-cell {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            background-color: var(--light-off);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        }
+
+        .light-cell.on {
+            background-color: var(--light-on);
+            box-shadow: 0 0 15px rgba(255, 224, 130, 0.7);
+        }
+
+        .light-cell::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            right: 5px;
+            bottom: 5px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1));
+        }
+
+        .light-cell.on::after {
+            background: linear-gradient(135deg, rgba(255,255,255,0.5), rgba(255,255,255,0.2));
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .control-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .new-game-btn {
+            background: linear-gradient(to right, var(--gold), var(--coffee));
+            color: white;
+            box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .hint-btn {
+            background: var(--beige);
+            color: var(--coffee);
+        }
+
+        .hint-btn:hover {
+            background: var(--light-brown);
+        }
+
+        .level-selector {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .level-btn {
+            padding: 0.5rem 1rem;
+            margin: 0 0.3rem;
+            border: 1px solid var(--light-brown);
+            border-radius: 50px;
+            background: transparent;
+            color: var(--coffee);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .level-btn.active {
+            background: var(--gold);
+            color: white;
+            border-color: var(--gold);
+        }
+
+        .level-btn:hover {
+            border-color: var(--gold);
+        }
+
+        .moves-counter {
+            text-align: center;
+            margin-top: 1rem;
+            font-weight: 600;
+            color: var(--coffee);
+        }
+
+        /* Анимации */
+        @keyframes successPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+        }
+
+        .success-animation {
+            animation: successPulse 0.6s ease-out;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: linear-gradient(to top, var(--beige), transparent);
+            margin-top: 3rem;
+            position: relative;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .game-title {
+                font-size: 1.5rem;
+            }
+            
+            .game-container {
+                padding: 1rem;
+            }
+            
+            .game-board {
+                padding: 1.5rem;
+            }
+            
+            .light-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 8px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+            
+            .control-btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Фон с пузырями -->
+    <div class="bubbles-bg" id="bubblesBg"></div>
+
+    <header>
+        <div class="logo">BrainSpark</div>
+        <h1 class="game-title">Light It Up</h1>
+    </header>
+
+    <div class="game-container">
+        <div class="level-selector">
+            <button class="level-btn active" data-level="5">5×5</button>
+            <button class="level-btn" data-level="7">7×7</button>
+            <button class="level-btn" data-level="9">9×9</button>
+        </div>
+
+        <div class="game-board">
+            <div class="light-grid" id="lightGrid"></div>
+            <div class="moves-counter">Ходов: <span id="movesCount">0</span></div>
+            
+            <div class="game-controls">
+                <button class="control-btn hint-btn" id="hintBtn">Подсказка</button>
+                <button class="control-btn new-game-btn" id="newGameBtn">Новая игра</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h2 style="font-family: 'Playfair Display', serif; color: var(--coffee); margin-bottom: 1rem;">Описание игры</h2>
+        <div class="game-description">
+            <p>Зажгите все лампочки, нажимая на переключатели. Каждое нажатие переключает состояние самой лампочки и соседних с ней (по горизонтали и вертикали).</p>
+            <p>Игра развивает логическое мышление и способность видеть скрытые взаимосвязи между элементами.</p>
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat"><i class="fas fa-clock"></i> 2-6 мин/день</div>
+            <div class="stat"><i class="fas fa-chart-line"></i> Высокая сложность</div>
+            <div class="stat"><i class="fas fa-brain"></i> Логика & Пространственное мышление</div>
+        </div>
+        
+        <p style="margin-top: 1.5rem; font-style: italic; color: var(--coffee);">
+            <strong>Применение в жизни:</strong> Учит видеть скрытые взаимосвязи и находить неочевидные решения сложных задач.
+        </p>
+    </div>
+
+    <footer>
+        <p>© 2023 BrainSpark | Разработано <a href="https://t.me/porofite" style="color: var(--coffee); text-decoration: none; font-weight: 600;">Porofite Games</a></p>
+        <p>Тренируйтесь с удовольствием и видите прогресс каждый день!</p>
+    </footer>
+
+    <script>
+        // Создаем пузыри на фоне
+        function createBubbles() {
+            const bubblesBg = document.getElementById('bubblesBg');
+            const bubbleCount = window.innerWidth < 768 ? 20 : 40;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                
+                const size = Math.random() * 60 + 20;
+                const posX = Math.random() * 100;
+                const delay = Math.random() * 15;
+                const duration = Math.random() * 15 + 10;
+                
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${posX}%`;
+                bubble.style.bottom = `-${size}px`;
+                bubble.style.animationDelay = `${delay}s`;
+                bubble.style.animationDuration = `${duration}s`;
+                
+                bubblesBg.appendChild(bubble);
+            }
+        }
+
+        // Логика игры Light It Up
+        document.addEventListener('DOMContentLoaded', function() {
+            createBubbles();
+            
+            const lightGrid = document.getElementById('lightGrid');
+            const newGameBtn = document.getElementById('newGameBtn');
+            const hintBtn = document.getElementById('hintBtn');
+            const levelBtns = document.querySelectorAll('.level-btn');
+            const movesCounter = document.getElementById('movesCount');
+            
+            let gridSize = 5;
+            let board = [];
+            let moves = 0;
+            let gameWon = false;
+            
+            // Инициализация игры
+            function initGame() {
+                // Создаем случайную доску
+                board = createRandomBoard(gridSize);
+                
+                // Отрисовываем доску
+                renderBoard();
+                
+                moves = 0;
+                movesCounter.textContent = moves;
+                gameWon = false;
+            }
+            
+            // Создание случайной доски
+            function createRandomBoard(size) {
+                const newBoard = [];
+                
+                // Сначала создаем пустую доску
+                for (let i = 0; i < size; i++) {
+                    newBoard[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        newBoard[i][j] = false; // false - свет выключен
+                    }
+                }
+                
+                // Делаем несколько случайных ходов для создания решаемой головоломки
+                const movesCount = size * size * 2;
+                for (let k = 0; k < movesCount; k++) {
+                    const row = Math.floor(Math.random() * size);
+                    const col = Math.floor(Math.random() * size);
+                    toggleLights(newBoard, row, col);
+                }
+                
+                return newBoard;
+            }
+            
+            // Переключение лампочек
+            function toggleLights(board, row, col) {
+                const size = board.length;
+                
+                // Текущая клетка
+                board[row][col] = !board[row][col];
+                
+                // Соседние клетки (верх, право, низ, лево)
+                const neighbors = [
+                    [row - 1, col], // верх
+                    [row, col + 1], // право
+                    [row + 1, col], // низ
+                    [row, col - 1]  // лево
+                ];
+                
+                neighbors.forEach(function(neighbor) {
+                    const [r, c] = neighbor;
+                    if (r >= 0 && r < size && c >= 0 && c < size) {
+                        board[r][c] = !board[r][c];
+                    }
+                });
+            }
+            
+            // Отрисовка доски
+            function renderBoard() {
+                lightGrid.innerHTML = '';
+                lightGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+                
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        const cell = document.createElement('div');
+                        cell.classList.add('light-cell');
+                        if (board[i][j]) {
+                            cell.classList.add('on');
+                        }
+                        
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        
+                        cell.addEventListener('click', function() {
+                            if (gameWon) return;
+                            
+                            const row = parseInt(this.dataset.row);
+                            const col = parseInt(this.dataset.col);
+                            
+                            toggleLights(board, row, col);
+                            moves++;
+                            movesCounter.textContent = moves;
+                            
+                            renderBoard();
+                            
+                            if (checkWin()) {
+                                gameWon = true;
+                                setTimeout(function() {
+                                    alert(`Поздравляем! Вы зажгли все лампочки за ${moves} ходов!`);
+                                    lightGrid.classList.add('success-animation');
+                                    setTimeout(function() {
+                                        lightGrid.classList.remove('success-animation');
+                                    }, 600);
+                                }, 100);
+                            }
+                        });
+                        
+                        lightGrid.appendChild(cell);
+                    }
+                }
+            }
+            
+            // Проверка победы
+            function checkWin() {
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if (!board[i][j]) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            // Подсказка
+            function showHint() {
+                if (gameWon) return;
+                
+                // Находим первую выключенную лампочку
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if (!board[i][j]) {
+                            // Подсвечиваем клетку, которую нужно нажать
+                            const cell = document.querySelector(`.light-cell[data-row="${i}"][data-col="${j}"]`);
+                            cell.style.boxShadow = '0 0 10px 5px rgba(212, 175, 55, 0.7)';
+                            
+                            setTimeout(function() {
+                                cell.style.boxShadow = '';
+                            }, 2000);
+                            
+                            return;
+                        }
+                    }
+                }
+            }
+            
+            // Обработчики событий
+            newGameBtn.addEventListener('click', initGame);
+            hintBtn.addEventListener('click', showHint);
+            
+            levelBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    levelBtns.forEach(function(b) {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    gridSize = parseInt(this.dataset.level);
+                    initGame();
+                });
+            });
+            
+            // Инициализация игры при загрузке
+            initGame();
+            
+            // Адаптация к изменению размера экрана
+            window.addEventListener('resize', function() {
+                document.querySelectorAll('.bubble').forEach(function(bubble) {
+                    bubble.remove();
+                });
+                createBubbles();
+            });
+        });
+    </script>
+</body>
+</html>
